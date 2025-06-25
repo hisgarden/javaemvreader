@@ -52,13 +52,13 @@ public class AID {
 
     public AID(byte[] aid) {
         if (aid == null){
-            throw new IllegalArgumentException("Argument 'aid' cannot be null");
+            throw new IllegalArgumentException("AID cannot be null");
         }
         if (aid.length < 5) {
-            throw new IllegalArgumentException("AID length < 5. Length=" + aid.length);
+            throw new IllegalArgumentException("Invalid AID length: must be 5-16 bytes. Length=" + aid.length);
         }
         if (aid.length > 16) {
-            throw new IllegalArgumentException("AID length > 16. Length=" + aid.length);
+            throw new IllegalArgumentException("Invalid AID length: must be 5-16 bytes. Length=" + aid.length);
         }
         rid = new byte[5];
         System.arraycopy(aid, 0, rid, 0, rid.length);
@@ -68,7 +68,7 @@ public class AID {
     }
 
     public AID(String aid) {
-        this(Util.fromHexString(aid));
+        this(aid == null ? null : Util.fromHexString(aid));
     }
 
     public byte[] getAIDBytes() {
@@ -88,6 +88,30 @@ public class AID {
 
     public boolean belongsToRID(byte[] rid) {
         return Arrays.equals(this.rid, rid);
+    }
+    
+    public RID getRID() {
+        return new RID(getRIDBytes());
+    }
+    
+    public boolean partialMatch(AID other) {
+        if (other == null) {
+            return false;
+        }
+        byte[] otherBytes = other.getAIDBytes();
+        byte[] thisBytes = this.getAIDBytes();
+        
+        // Check if the other AID is a prefix of this AID
+        if (otherBytes.length > thisBytes.length) {
+            return false;
+        }
+        
+        for (int i = 0; i < otherBytes.length; i++) {
+            if (thisBytes[i] != otherBytes[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -50,6 +50,10 @@ public class RID {
     public RID(String rid, String applicant, String country) {
         this(Util.fromHexString(rid), applicant, country);
     }
+    
+    public RID(byte[] rid) {
+        this(rid, "", "");
+    }
 
     public byte[] getRIDBytes() {
         return Arrays.copyOf(rid, rid.length);

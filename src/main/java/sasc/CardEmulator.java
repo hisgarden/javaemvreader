@@ -228,6 +228,10 @@ public class CardEmulator implements CardConnection {
 
     @Override
     public CardResponse transmit(byte[] cmd) throws TerminalException {
+        if (cmd == null || cmd.length < 4) {
+            throw new TerminalException("Invalid command length: command must be at least 4 bytes");
+        }
+        
         CardResponse response = null;
 
         if(hasLe(cmd)){ //Strip Le
@@ -248,7 +252,7 @@ public class CardEmulator implements CardConnection {
         byte[] responseBytes = null;
 
         switch (cls & (byte) 0xF0) { //High nibble MASK
-            case (byte) 0x00: //0x
+                            case (byte) 0x00: //0x
                 switch (ins) {
                     case (byte) 0xA4: //SELECT
                         responseBytes = processSelect(cmd);
@@ -260,7 +264,7 @@ public class CardEmulator implements CardConnection {
                         responseBytes = processVerify(cmd);
                         break;
                     default:
-                        throw new RuntimeException("INS " + Util.byte2Hex(ins) + " not implemented yet. cmd=" + cmdStr);
+                        responseBytes = createResponse(null, SW.INSTRUCTION_CODE_NOT_SUPPORTED_OR_INVALID);
                 }
                 break;
             case (byte) 0x80: //8x
@@ -272,7 +276,7 @@ public class CardEmulator implements CardConnection {
                         responseBytes = processGetData(cmd);
                         break;
                     default:
-                        throw new RuntimeException("INS " + Util.byte2Hex(ins) + " not implemented yet. cmd=" + cmdStr);
+                        responseBytes = createResponse(null, SW.INSTRUCTION_CODE_NOT_SUPPORTED_OR_INVALID);
                 }
                 break;
             case (byte) 0xF0:
@@ -285,7 +289,7 @@ public class CardEmulator implements CardConnection {
             case (byte) 0xE0: //Ex
 //                break;
             default:
-                throw new RuntimeException("CLS " + Util.byte2Hex(cls) + " not implemented yet. cmd=" + cmdStr);
+                responseBytes = createResponse(null, SW.INSTRUCTION_CODE_NOT_SUPPORTED_OR_INVALID);
         }
 
         if (responseBytes == null) {
